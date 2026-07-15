@@ -1,7 +1,7 @@
 // building react
 
 const hooks = [];
-const hookIndex = 0;
+let hookIndex = 0;
 
 const effects = [];
 const pendingEffects = [];
@@ -77,7 +77,7 @@ function createTextElement(text) {
 }
 
 function render(element, container) {
-  if (!rootElement) {
+  if (rootContainer === null) {
     rootElement = element;
     rootContainer = container;
   }
@@ -110,7 +110,7 @@ function render(element, container) {
 function createDOM(element) {
   const dom =
     element.type === "TEXT_ELEMENT"
-      ? document.createTextNode("")
+      ? document.createTextNode(element.props.nodeValue)
       : document.createElement(element.type);
   //attaching properties to the dom
   attachProps(dom, element.props);
@@ -130,3 +130,5 @@ function attachProps(dom, props) {
     }
   });
 }
+
+export { createElement, render, useState, useEffect };
