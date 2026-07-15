@@ -3,6 +3,9 @@
 const hooks = [];
 const hookIndex = 0;
 
+let rootElement = null;
+let rootContainer = null;
+
 function useState(initialValue) {
   const currentIndex = hookIndex;
 
@@ -12,6 +15,8 @@ function useState(initialValue) {
 
   function setState(newValue) {
     hooks[currentIndex] = newValue;
+    hookIndex = 0;
+    render(rootElement, rootContainer);
   }
 
   hookIndex++;
@@ -40,6 +45,15 @@ function createTextElement(text) {
 }
 
 function render(element, container) {
+  if (!rootElement) {
+    rootElement = element;
+    rootContainer = container;
+  }
+
+  if (container === rootContainer) {
+    container.innerHTML = "";
+  }
+
   if (typeof element.type === "function") {
     const childElement = element.type(element.props, element.children);
     render(childElement, container);
