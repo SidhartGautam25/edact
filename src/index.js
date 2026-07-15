@@ -1,5 +1,24 @@
 // building react
 
+const hooks = [];
+const hookIndex = 0;
+
+function useState(initialValue) {
+  const currentIndex = hookIndex;
+
+  if (hooks[currentIndex] === undefined) {
+    hooks[currentIndex] = initialValue;
+  }
+
+  function setState(newValue) {
+    hooks[currentIndex] = newValue;
+  }
+
+  hookIndex++;
+
+  return [hooks[currentIndex], setState];
+}
+
 function createElement(type, props, ...children) {
   return {
     type,
@@ -22,7 +41,7 @@ function createTextElement(text) {
 
 function render(element, container) {
   if (typeof element.type === "function") {
-    const childElement = element.type(element.props);
+    const childElement = element.type(element.props, element.children);
     render(childElement, container);
     return;
   }
