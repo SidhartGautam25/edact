@@ -3,6 +3,9 @@
 const hooks = [];
 const hookIndex = 0;
 
+const effects = [];
+const pendingEffects = [];
+
 let rootElement = null;
 let rootContainer = null;
 
@@ -22,6 +25,35 @@ function useState(initialValue) {
   hookIndex++;
 
   return [hooks[currentIndex], setState];
+}
+
+function useEffect(effect, deps = []) {
+  const currentIndex = hookIndex;
+
+  const previous = effects[currentIndex];
+
+  const changed =
+    !previous ||
+    previous.deps.some((value, index) => {
+      return value !== deps[index];
+    });
+
+  if (changed) {
+    pendingEffects.push(() => {
+      if (previous?.cleanup) {
+        previous.cleanup();
+      }
+
+      const cleanup = effect();
+
+      effects[currentIndex] = {
+        deps,
+        cleanup,
+      };
+    });
+  }
+
+  hookIndex++;
 }
 
 function createElement(type, props, ...children) {
@@ -65,6 +97,14 @@ function render(element, container) {
   element.children.forEach((child) => {
     render(child, dom);
   });
+
+  if (container === rootContainer) {
+    pendingEffects.forEach((effect) => {
+      effect();
+    });
+
+    pendingEffects.length = 0;
+  }
 }
 
 function createDOM(element) {
