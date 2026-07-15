@@ -3,9 +3,7 @@
 function createElement(type, props, ...children) {
   return {
     type,
-    props: {
-      ...props,
-    },
+    props: props || {},
     children: children.map((child) =>
       typeof child === "object" ? child : createTextElement(child),
     ),
@@ -36,5 +34,20 @@ function createDOM(element) {
       ? document.createTextNode("")
       : document.createElement(element.type);
   //attaching properties to the dom
+  attachProps(dom, element.props);
   return dom;
+}
+
+function attachProps(dom, props) {
+  Object.keys(props).forEach((key) => {
+    if (key === "children") {
+      return;
+    }
+    if (key.startsWith("on")) {
+      const eventType = key.toLowerCase().substring(2);
+      dom.addEventListener(eventType, props[key]);
+    } else {
+      dom[key] = props[key];
+    }
+  });
 }
