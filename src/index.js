@@ -21,6 +21,12 @@ function createTextElement(text) {
 }
 
 function render(element, container) {
+  if (typeof element.type === "function") {
+    const childElement = element.type(element.props);
+    render(childElement, container);
+    return;
+  }
+
   const dom = createDOM(element);
   container.appendChild(dom);
   element.children.forEach((child) => {
