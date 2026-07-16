@@ -3,7 +3,9 @@ function renderToString(element) {
     return element.props.nodeValue;
   }
 
-  return `<${element.type}></${element.type}>`;
+  const children = element.children.map(renderToString).join("");
+
+  return `<${element.type}>${children}</${element.type}>`;
 }
 
 export { renderToString };
