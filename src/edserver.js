@@ -59,7 +59,19 @@ async function loadPage(root, pathname) {
   }
 }
 
+async function loadLayout(root) {
+  try {
+    const module = await import(`${root}/layout.js`);
+
+    return module.default;
+  } catch {
+    return null;
+  }
+}
+
 async function createServer({ root = "./app", port = 3000 } = {}) {
+  const Layout = await loadLayout(root);
+
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
 
@@ -67,16 +79,21 @@ async function createServer({ root = "./app", port = 3000 } = {}) {
 
     const Component = Page ?? Default404;
 
-    const html = renderDocument(renderToString(createElement(Component)));
+    const page = createElement(Component);
+
+    const tree = Layout
+      ? createElement(Layout, {
+          children: page,
+        })
+      : page;
+
+    const html = renderDocument(renderToString(tree));
 
     res.setHeader("Content-Type", "text/html");
 
     res.end(html);
   });
 
-  server.listen(port, () => {
-    console.log(`EdServer running on http://localhost:${port}`);
-  });
+  server.listen(port);
 }
-
 export { createServer };

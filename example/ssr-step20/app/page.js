@@ -1,3 +1,3 @@
 export default function Page() {
-  return createElement("h1", null, "Home");
+  return createElement("h1", null, "Home Page");
 }
