@@ -131,19 +131,20 @@ function attachProps(dom, props) {
   });
 }
 
-function useStore(store) {
-  const state = store.getState();
+function useStore(store, selector = (state) => state) {
+  const selected = selector(store.getState());
 
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {
       hookIndex = 0;
+
       render(rootElement, rootContainer);
     });
 
     return unsubscribe;
   }, []);
 
-  return state;
+  return selected;
 }
 
 export { createElement, render, useState, useEffect, useStore };
