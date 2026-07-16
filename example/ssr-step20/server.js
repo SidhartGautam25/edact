@@ -1,11 +1,9 @@
-/** @jsx createElement */
-
 import http from "node:http";
 
 import { createElement } from "../../src/edact.js";
 import { renderToString } from "../../src/renderer/string.js";
 
-import App from "./app.jsx";
+import App from "./app.js";
 
 function renderDocument(content) {
   return `
@@ -31,7 +29,7 @@ ${content}
 }
 
 const server = http.createServer((req, res) => {
-  const html = renderDocument(renderToString(<App />));
+  const html = renderDocument(renderToString(createElement(App, null)));
 
   res.setHeader("Content-Type", "text/html");
 
