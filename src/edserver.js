@@ -1,6 +1,6 @@
 import http from "node:http";
-import { createElement } from "../edact/edact.js";
-import { renderToString } from "../edact/renderer/string.js";
+import { createElement } from "./edact.js";
+import { renderToString } from "./renderer/string.js";
 
 const pageCache = new Map();
 

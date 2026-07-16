@@ -1,5 +1,5 @@
 import { createServer } from "../../src/edserver.js";
 await createServer({
-  root: "./ssr-step20/app",
+  root: new URL("./app", import.meta.url).href,
   port: 3000,
 });
