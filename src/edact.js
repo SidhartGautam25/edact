@@ -131,4 +131,19 @@ function attachProps(dom, props) {
   });
 }
 
-export { createElement, render, useState, useEffect };
+function useStore(store) {
+  const state = store.getState();
+
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      hookIndex = 0;
+      render(rootElement, rootContainer);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  return state;
+}
+
+export { createElement, render, useState, useEffect, useStore };
