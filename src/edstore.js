@@ -1,7 +1,7 @@
-function createStore(initialState) {
+function createStore(initialState, actions = {}) {
   let state = initialState;
 
-  let subscribers = [];
+  const subscribers = [];
 
   function getState() {
     return state;
@@ -27,14 +27,29 @@ function createStore(initialState) {
 
   function setState(newState) {
     state = newState;
-
     notify();
   }
+
+  function update(updater) {
+    setState(updater(state));
+  }
+
+  const storeActions = {};
+
+  Object.keys(actions).forEach((name) => {
+    storeActions[name] = (...args) => {
+      const newState = actions[name](state, ...args);
+
+      setState(newState);
+    };
+  });
 
   return {
     getState,
     setState,
+    update,
     subscribe,
+    ...storeActions,
   };
 }
 
