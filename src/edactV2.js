@@ -10,6 +10,8 @@ let rootElement = null;
 let rootContainer = null;
 let oldTree = null;
 
+const deletions = [];
+
 function isEvent(key) {
   return key.startsWith("on");
 }
@@ -39,6 +41,55 @@ function getEventName(key) {
   return key.slice(2).toLowerCase();
 }
 
+function hasKeys(children) {
+  return children.some((child) => child.key != null);
+}
+
+function buildKeyMap(children) {
+  const map = new Map();
+
+  children.forEach((child, index) => {
+    child.index = index;
+
+    if (child.key != null) {
+      map.set(child.key, child);
+    }
+  });
+
+  return map;
+}
+
+function reconcileIndexedChildren(parentDom, oldChildren, newChildren) {
+  const count = Math.max(oldChildren.length, newChildren.length);
+
+  for (let i = 0; i < count; i++) {
+    reconcile(parentDom, oldChildren[i] ?? null, newChildren[i] ?? null);
+  }
+}
+
+function reconcileKeyedChildren(parentDom, oldChildren, newChildren) {
+  const oldMap = buildKeyMap(oldChildren);
+
+  newChildren.forEach((newChild, newIndex) => {
+    const oldChild = oldMap.get(newChild.key);
+
+    if (oldChild) {
+      oldMap.delete(newChild.key);
+
+      if (oldChild.index !== newIndex) {
+        newChild.effect = "PLACEMENT";
+      }
+    }
+
+    reconcile(parentDom, oldChild ?? null, newChild);
+  });
+
+  for (const oldChild of oldMap.values()) {
+    oldChild.effect = "DELETION";
+    deletions.push(oldChild);
+  }
+}
+
 function reconcile(oldElement, newElement, container) {
   if (!oldElement) {
     mountElement(newElement, container);
@@ -57,12 +108,18 @@ function reconcile(oldElement, newElement, container) {
   }
   newElement.dom = oldElement.dom;
   updateDOM(newElement.dom, oldElement.props, newElement.props);
-  const count = Math.max(
-    oldElement.children.length,
-    newElement.children.length,
-  );
-  for (let i = 0; i < count; i++) {
-    reconcile(oldElement.children[i], newElement.children[i], newElement.dom);
+  if (hasKeys(newNode.children)) {
+    reconcileKeyedChildren(
+      newElement.dom,
+      oldElement.children,
+      newElement.children,
+    );
+  } else {
+    reconcileIndexedChildren(
+      newElement.dom,
+      oldElement.children,
+      newElement.children,
+    );
   }
 }
 
