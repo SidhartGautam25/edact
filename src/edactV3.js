@@ -9,6 +9,7 @@ const pendingEffects = [];
 let rootElement = null;
 let rootContainer = null;
 let oldTree = null;
+let rootFiber = null;
 
 const deletions = [];
 
@@ -69,6 +70,18 @@ function createFiber(element, parent = null) {
         parent,
         child: null,
         nextSibling: null,
+        element,
+    };
+}
+
+function createRootFiber(element, container) {
+    return {
+        type: "ROOT",
+        props: {},
+        dom: container,
+        parent: null,
+        child: null,
+        sibling: null,
         element,
     };
 }
@@ -294,7 +307,8 @@ function createTextElement(text) {
 }
 
 function render(element, container) {
-    if (rootContainer === null) {
+    if (rootFiber === null) {
+        rootFiber = createRootFiber(element, container);
         rootElement = element;
         rootContainer = container;
     }
