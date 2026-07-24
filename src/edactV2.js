@@ -63,7 +63,7 @@ function reconcileIndexedChildren(parentDom, oldChildren, newChildren) {
   const count = Math.max(oldChildren.length, newChildren.length);
 
   for (let i = 0; i < count; i++) {
-    reconcile(parentDom, oldChildren[i] ?? null, newChildren[i] ?? null);
+    reconcile(oldChildren[i] ?? null, newChildren[i] ?? null, parentDom);
   }
 }
 
@@ -81,7 +81,7 @@ function reconcileKeyedChildren(parentDom, oldChildren, newChildren) {
       }
     }
 
-    reconcile(parentDom, oldChild ?? null, newChild);
+    reconcile(oldChild ?? null, newChild, parentDom);
   });
 
   for (const oldChild of oldMap.values()) {
@@ -93,6 +93,7 @@ function reconcileKeyedChildren(parentDom, oldChildren, newChildren) {
 function reconcile(oldElement, newElement, container) {
   if (!oldElement) {
     mountElement(newElement, container);
+    return;
   }
   if (!newElement) {
     container.removeChild(oldElement.dom);
@@ -108,7 +109,7 @@ function reconcile(oldElement, newElement, container) {
   }
   newElement.dom = oldElement.dom;
   updateDOM(newElement.dom, oldElement.props, newElement.props);
-  if (hasKeys(newNode.children)) {
+  if (hasKeys(newElement.children)) {
     reconcileKeyedChildren(
       newElement.dom,
       oldElement.children,
@@ -131,11 +132,11 @@ function resolveComponent(element) {
     return resolveComponent(element.type(element.props, element.children));
   }
   return {
-    type: node.type,
+    type: element.type,
 
-    props: node.props,
+    props: element.props,
 
-    children: node.children.map(resolveTree),
+    children: element.children.map(resolveComponent),
   };
 }
 function updateDOM(dom, oldProps, newProps) {
